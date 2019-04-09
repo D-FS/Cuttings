@@ -27,7 +27,7 @@ def ellipsoid_test_image(npoints, a, b, c, noise_amplitude, rotation_angle_x, ro
     points = points - center
     
     # aggregate coordinates xyz after rotation
-    test_image_coord = np.dot(points, bf.rotation(rotation_angle_x, rotation_angle_x, 'yx'))
+    test_image_coord = np.dot(points, bf.rotation(rotation_angle_x, rotation_angle_y, 'yx'))
     
     # recenter test_image_coord = put center to 0
     center = bf.compute_center(test_image_coord)

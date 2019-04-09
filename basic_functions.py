@@ -12,7 +12,7 @@ from numpy.random import random_sample as rand # random_sample returns floats in
 
 def create_ellipsoid(npoints, a, b, c):
     """
-    Create ellipsoid with a, b and c as half-axes and npoints the number of points
+    Create ellipsoid with a, b and c as half-axes and npoints the number of points (has to be an integer)
     return an array with shape (npoints, 3) 
     """
     points = np.zeros((npoints, 3)) # create an array of zeros from size npoints x 3
@@ -47,7 +47,7 @@ def rotation(theta, phi, order):
     Order is 'xy' = rotation along x first and then along y, or 'yx' = rotation along y first and then along x
     """
     Rx = [[1, 0, 0], [0, np.cos(theta), -np.sin(theta)], [0, np.sin(theta), np.cos(theta)]]
-    Ry = [[np.cos(phi), 0, np.sin(phi)], [0, 1, 0], [-np.sin(phi), 0, np.cos(phi)]]
+    Ry = [[np.cos(phi), 0, -np.sin(phi)], [0, 1, 0], [np.sin(phi), 0, np.cos(phi)]]
     if order == 'xy':
         M = np.dot(Rx, Ry)
     elif order == 'yx':

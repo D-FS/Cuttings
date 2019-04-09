@@ -8,6 +8,7 @@ Created on Mon Apr  8 11:12:03 2019
 #!/usr/bin/env python3
 
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D 
 import numpy as np
 import basic_functions as bf
 
@@ -72,6 +73,27 @@ def bbox_plot (coord_agg, optim_rotation_angle_x, optim_rotation_angle_y, npoint
     
     plot_coord = np.dot(np.c_[X,Y,Z], bf.rotation(-optim_rotation_angle_x, -optim_rotation_angle_y, 'yx'))
     ax.scatter(plot_coord[:, 0], plot_coord[:, 1], plot_coord[:, 2], marker='o', s=1, color='r')
+    #ax.view_init(elev=100., azim=45)
+    
+    return plt.show()
+
+def fit_ellipsoid_plot (coord_agg, a, b, c, npoints_ellipsoid):
+    """
+    Plots the cloud of points of the aggregate and its bounded or bounding ellispoid 
+    Needs the coordinates of the aggregate (3D array),
+    the half-axes of the fitting ellipsoid and 
+    the number of points composing the ellipsoid (npoints_ellipsoid)
+    """
+    # plot the cloud of points as a figure
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    ax.scatter(coord_agg[:, 0], coord_agg[:, 1], coord_agg[:, 2], marker='o', s=0.1)
+    
+    # draw ellipsoid
+    points_optim_ellipsoid = bf.create_ellipsoid(npoints_ellipsoid, a, b, c)
+    ax.scatter(points_optim_ellipsoid[:, 0], points_optim_ellipsoid[:, 1], points_optim_ellipsoid[:, 2], marker='o', s=0.1, c='r')
     #ax.view_init(elev=100., azim=45)
     
     return plt.show()

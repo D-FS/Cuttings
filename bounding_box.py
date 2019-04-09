@@ -11,7 +11,7 @@ import numpy as np
 import scipy as scipy
 import basic_functions as bf
 
-def fvolume(angles, coord):
+def bbox_volume(angles, coord):
     """
     Compute the volume of bouding box of a cloud of points
     for a given rotation of the cloud of points
@@ -44,8 +44,8 @@ def bbox_optim (coord, initial_guess):
     with respect to the rotation angles of the cloud of points
     Needs the cloud of points coordinates (3D array) and an initial guess of the rotation angle (rotation angle along x, rotation angle along y)
     """
-    res = scipy.optimize.minimize(fvolume, initial_guess, args=(coord), method='L-BFGS-B')
-    print(res)
+    res = scipy.optimize.minimize(bbox_volume, initial_guess, args=(coord), method='L-BFGS-B')
+    print('bouding box optimiztation: \n', res)
     return res
 
 
