@@ -14,7 +14,7 @@ import bounding_box as bbox
 import plot
 
 # Creating ellipsoidal test image
-test_image_coord = tie.ellipsoid_test_image(10000, 100., 50., 30., 5., np.pi/7., np.pi/6.)
+test_image_coord = tie.ellipsoid_test_image(10000, 100., 50., 30., 1., np.pi/7., np.pi/6.)
 plot.bbox_plot(tie.ellipsoid_test_image(10000, 100., 50., 30., 0., 0., 0.), 0., 0., 2)
 
 def bounding_ellipsoid_optim(coord, tol):
@@ -30,13 +30,13 @@ def bounding_ellipsoid_optim(coord, tol):
         
     # rotation of the cloud of oints in the main direction of the bbox    
     M = bf.rotation(bbox_res.x[0], bbox_res.x[1], 'xy')
-    coord_rot = np.dot(coord, M)
-    #plot.bbox_plot(coord_rot, 0., 0., 2)
+    coord = np.dot(coord, M)
+    #plot.bbox_plot(coord, 0., 0., 2)
     
     # initial a, b, c
-    a = np.sqrt((max(coord_rot[:, 0])-min(coord_rot[:, 0]))**2)/2.
-    b = np.sqrt((max(coord_rot[:, 1])-min(coord_rot[:, 1]))**2)/2.
-    c = np.sqrt((max(coord_rot[:, 2])-min(coord_rot[:, 2]))**2)/2.      
+    a = np.sqrt((max(coord[:, 0])-min(coord[:, 0]))**2)/2.
+    b = np.sqrt((max(coord[:, 1])-min(coord[:, 1]))**2)/2.
+    c = np.sqrt((max(coord[:, 2])-min(coord[:, 2]))**2)/2.      
 
     volume_before = 0.
     volume = 4./3.*np.pi*a*b*c
@@ -76,11 +76,12 @@ def bounding_ellipsoid_optim(coord, tol):
         
     print('volume =', volume)
     print('a = ', a,'b = ', b,'c = ', c)
-    plot.fit_ellipsoid_plot(coord_rot, a, b, c, 10000)
+    plot.fit_ellipsoid_plot(coord, a, b, c, 10000)
     return volume, a, b, c
 
+
+bounding_ellipsoid_optim(test_image_coord, 1e-3)
 """
-optim = bounding_ellipsoid_optim(test_image_coord, 1e-3)
 print(optim)
 
 plot.fit_ellipsoid_plot(coord_rot, optim[1], optim[2], optim[3], 10000)

@@ -9,6 +9,8 @@ Created on Thu Mar 28 09:49:37 2019
 
 import numpy as np
 import scipy as scipy
+from scipy import optimize
+from scipy.optimize import minimize
 import basic_functions as bf
 
 def bbox_volume(angles, coord):
