@@ -8,15 +8,8 @@ Created on Tue Apr  9 15:11:11 2019
 
 import numpy as np
 import basic_functions as bf
-import test_image_ellipsoid as tie
 import bounding_box as bbox
 import plot
-
-# Creating ellipsoidal test image
-test_image_coord = tie.ellipsoid_test_image(
-    10000, 100., 50., 30., 1., np.pi/7., np.pi/6.)
-plot.bbox_plot(tie.ellipsoid_test_image(
-    10000, 100., 50., 30., 0., 0., 0.), 0., 0., 2)
 
 
 def bounding_ellipsoid_optim(coord, tol):
@@ -57,9 +50,9 @@ def bounding_ellipsoid_optim(coord, tol):
             a_before = a
             b_before = b
             c_before = c
-            a = a*1.05
-            b = b*1.05
-            c = c*1.05
+            a = a*2
+            b = b*2
+            c = c*2
         elif point_outside == 'false':
             a1 = a_before
             b1 = b_before
@@ -67,9 +60,10 @@ def bounding_ellipsoid_optim(coord, tol):
             a_before = a
             b_before = b
             c_before = c
-            a = a + abs(a1-a)/2.
-            b = b + abs(b1-b)/2.
-            c = c + abs(c1-c)/2.
+            a = a - abs(a1-a)/2.
+            b = b - abs(b1-b)/2.
+            c = c - abs(c1-c)/2.
+
         volume = 4./3.*np.pi*a*b*c
         """
         print(point_outside)
@@ -80,11 +74,3 @@ def bounding_ellipsoid_optim(coord, tol):
     print('a = ', a, 'b = ', b, 'c = ', c)
     plot.fit_ellipsoid_plot(coord, a, b, c, 10000)
     return volume, a, b, c
-
-
-bounding_ellipsoid_optim(test_image_coord, 1e-3)
-"""
-print(optim)
-
-plot.fit_ellipsoid_plot(coord_rot, optim[1], optim[2], optim[3], 10000)
-"""
