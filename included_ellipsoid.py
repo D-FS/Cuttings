@@ -52,9 +52,9 @@ def included_ellipsoid_optim(coord, tol):
             a_before = a
             b_before = b
             c_before = c
-            a = a*0.95
-            b = b*0.95
-            c = c*0.95
+            a = a*0.5
+            b = b*0.5
+            c = c*0.5
             test = 'true'
         elif point_inside == 'false' and test == 'true':
             a1 = a_before
