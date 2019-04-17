@@ -12,6 +12,22 @@ import numpy as np
 import basic_functions as bf
 
 
+def scatter_plot(coord_agg, fig=None):
+    """
+    Plots the cloud of points of the aggregate
+    """
+    # plot the cloud of points as a figure
+    if fig is None:
+        fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('y')
+    ax.scatter(coord_agg[:, 0], coord_agg[:, 1],
+               coord_agg[:, 2], marker='o', s=0.1)
+    return fig
+
+
 def radii_histogram(coord):
     """
     Plot the histogram of radii from the ellpsoid test image
@@ -28,11 +44,10 @@ def radii_histogram(coord):
     ax = fig.add_subplot(111)
     ax.plot(bins, hist)
 
-    return plt.show()
+    return
 
 
-def bbox_plot(coord_agg, optim_rotation_angle_x, optim_rotation_angle_y,
-              npoints_bbox):
+def bbox_plot(coord_agg, bbox, npoints_bbox=20, fig=None):
     """
     Plots the cloud of points of the aggregate and its bounding box
     Needs the coordinates of the aggregate (3D array),
@@ -40,7 +55,8 @@ def bbox_plot(coord_agg, optim_rotation_angle_x, optim_rotation_angle_y,
     the number of points in each edge of the bounding box (npoints_bbox)
     """
     # plot the cloud of points as a figure
-    fig = plt.figure()
+    if fig is None:
+        fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     plt.xlabel('x')
     plt.ylabel('y')
@@ -48,7 +64,7 @@ def bbox_plot(coord_agg, optim_rotation_angle_x, optim_rotation_angle_y,
                coord_agg[:, 2], marker='o', s=0.1)
 
     # draw bounding box
-    ROT = bf.rotation(optim_rotation_angle_x, optim_rotation_angle_y, 'xy')
+    ROT = bf.rotation(bbox['angles'])
     coord_rot = np.dot(coord_agg, ROT)
 
     min_x = min(coord_rot[:, 0])
@@ -78,16 +94,41 @@ def bbox_plot(coord_agg, optim_rotation_angle_x, optim_rotation_angle_y,
 
     plot_coord = np.dot(
         np.c_[X, Y, Z],
-        bf.rotation(-optim_rotation_angle_x, -optim_rotation_angle_y, 'yx')
+        bf.rotation(-bbox['angles'], 'yx')
     )
     ax.scatter(plot_coord[:, 0], plot_coord[:, 1],
                plot_coord[:, 2], marker='o', s=1, color='r')
     # ax.view_init(elev=100., azim=45)
 
-    return plt.show()
+    return
 
 
-def fit_ellipsoid_plot(coord_agg, a, b, c, npoints_ellipsoid):
+def plot_ellipsoid(ellipsoid, ax=None):
+    "simply dray an ellipsoid"
+
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+    rx, ry, rz = ellipsoid['a'], ellipsoid['b'], ellipsoid['c']
+    # Radii corresponding to the coefficients:
+
+    # Set of all spherical angles:
+    u = np.linspace(0, 2 * np.pi, 50)
+    v = np.linspace(0, np.pi, 50)
+
+    # Cartesian coordinates that correspond to the spherical angles:
+    # (this is the equation of an ellipsoid):
+    x = rx * np.outer(np.cos(u), np.sin(v))
+    y = ry * np.outer(np.sin(u), np.sin(v))
+    z = rz * np.outer(np.ones_like(u), np.cos(v))
+
+    # Plot:
+    ax.plot_wireframe(x, y, z,  rstride=4, cstride=4,
+                      color='r', linewidths=.6)
+
+
+def fit_ellipsoid_plot(coord_agg, ellipsoid):
     """
     Plots the cloud of points of the aggregate and its bounded or
     bounding ellipsoid
@@ -104,9 +145,6 @@ def fit_ellipsoid_plot(coord_agg, a, b, c, npoints_ellipsoid):
                coord_agg[:, 2], marker='o', s=0.1)
 
     # draw ellipsoid
-    points_optim_ellipsoid = bf.create_ellipsoid(npoints_ellipsoid, a, b, c)
-    ax.scatter(points_optim_ellipsoid[:, 0], points_optim_ellipsoid[:, 1],
-               points_optim_ellipsoid[:, 2], marker='o', s=0.1, c='r')
-    # ax.view_init(elev=100., azim=45)
+    plot_ellipsoid(ellipsoid, ax=ax)
 
-    return plt.show()
+    return fig
