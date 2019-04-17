@@ -12,20 +12,21 @@ import numpy as np
 import basic_functions as bf
 
 
-def scatter_plot(coord_agg, fig=None):
+def scatter_plot(coord_agg, ax=None):
     """
     Plots the cloud of points of the aggregate
     """
     # plot the cloud of points as a figure
-    if fig is None:
+    if ax is None:
         fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(111, projection='3d')
+
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('y')
     ax.scatter(coord_agg[:, 0], coord_agg[:, 1],
                coord_agg[:, 2], marker='o', s=0.1)
-    return fig
+    return ax
 
 
 def radii_histogram(coord):
@@ -47,7 +48,7 @@ def radii_histogram(coord):
     return
 
 
-def bbox_plot(coord_agg, bbox, npoints_bbox=20, fig=None):
+def bbox_plot(coord_agg, bbox, npoints_bbox=20, ax=None):
     """
     Plots the cloud of points of the aggregate and its bounding box
     Needs the coordinates of the aggregate (3D array),
@@ -55,9 +56,9 @@ def bbox_plot(coord_agg, bbox, npoints_bbox=20, fig=None):
     the number of points in each edge of the bounding box (npoints_bbox)
     """
     # plot the cloud of points as a figure
-    if fig is None:
+    if ax is None:
         fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(111, projection='3d')
     plt.xlabel('x')
     plt.ylabel('y')
     ax.scatter(coord_agg[:, 0], coord_agg[:, 1],
@@ -147,4 +148,4 @@ def fit_ellipsoid_plot(coord_agg, ellipsoid):
     # draw ellipsoid
     plot_ellipsoid(ellipsoid, ax=ax)
 
-    return fig
+    return ax
