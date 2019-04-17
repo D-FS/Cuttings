@@ -36,7 +36,7 @@ aggregate = tie.ellipsoid_test_image(ellipsoid,
 plot.scatter_plot(aggregate)
 
 ellipsoid = be.bounding_ellipsoid_optim(aggregate, 1e-3)
-rotated_ellipsoid = bf.rotate_aggregate(aggregate,
+rotated_aggregate = bf.rotate_aggregate(aggregate,
                                         angles=ellipsoid['bbox']['angles'])
 plot.fit_ellipsoid_plot(rotated_aggregate, ellipsoid)
 
@@ -49,7 +49,7 @@ aggregate = tie.ellipsoid_test_image(ellipsoid,
 plot.scatter_plot(aggregate)
 
 ellipsoid = be.bounding_ellipsoid_optim(aggregate)
-rotated_ellipsoid = bf.rotate_aggregate(aggregate,
+rotated_aggregate = bf.rotate_aggregate(aggregate,
                                         angles=ellipsoid['bbox']['angles'])
 plot.fit_ellipsoid_plot(rotated_aggregate, ellipsoid)
 
