@@ -12,20 +12,19 @@ import bounding_box as bbox
 import plot
 
 
-def bounding_ellipsoid_optim(coord, tol):
+def bounding_ellipsoid_optim(coord, tol=1e-3, quiet=True):
     """
     Compute the smallest bounding ellidpsoid of a cloud of points
     Needs the required precision (tol)
     and the coordinates (3D array) of the cloud of points
     """
     # finding optimal bounding box
-    bbox_initial_guess = [0., 0.]
-    bbox_res = bbox.bbox_optim(coord, bbox_initial_guess)
-    plot.bbox_plot(coord, bbox_res.x[0], bbox_res.x[1], 100)
+    bbox_res = bbox.bbox_optim(coord)
+    if quiet is False:
+        plot.bbox_plot(coord, bbox_res)
 
-    # rotation of the cloud of oints in the main direction of the bbox
-    M = bf.rotation(bbox_res.x[0], bbox_res.x[1], 'xy')
-    coord = np.dot(coord, M)
+    # rotation of the cloud of points in the main direction of the bbox
+    coord = bf.rotate_aggregate(coord, angles=bbox_res['angles'])
     # plot.bbox_plot(coord, 0., 0., 2)
 
     # initial a, b, c
@@ -39,8 +38,11 @@ def bounding_ellipsoid_optim(coord, tol):
     while abs(volume - volume_before) > tol:
         volume_before = volume
         # test if points outside the bounded ellipsoid
+
         for i in range(len(coord)):
-            if (coord[i, 0]**2/a**2+coord[i, 1]**2/b**2+coord[i, 2]**2/c**2) > 1:
+            if (coord[i, 0]**2/a**2 +
+                coord[i, 1]**2/b**2 +
+                coord[i, 2]**2/c**2) > 1:
                 point_outside = 'true'
                 break
             else:
@@ -70,7 +72,12 @@ def bounding_ellipsoid_optim(coord, tol):
         print('before =', volume_before)
         """
 
-    print('volume =', volume)
-    print('a = ', a, 'b = ', b, 'c = ', c)
-    plot.fit_ellipsoid_plot(coord, a, b, c, 10000)
-    return volume, a, b, c
+    if (quiet is False):
+        print('volume =', volume)
+        print('a = ', a, 'b = ', b, 'c = ', c)
+        plot.fit_ellipsoid_plot(coord, a, b, c, 10000)
+    return {'volume': volume,
+            'a': a,
+            'b': b,
+            'c': c,
+            'bbox': bbox_res}

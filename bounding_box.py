@@ -7,41 +7,32 @@ Created on Thu Mar 28 09:49:37 2019
 """
 
 import numpy as np
-import scipy as scipy
-from scipy import optimize
 from scipy.optimize import minimize
 import basic_functions as bf
 
 
-def bbox_volume(angles, coord):
+def bbox_volume(coords, angles=(0., 0.)):
     """
     Compute the volume of bouding box of a cloud of points
     for a given rotation of the cloud of points
     Needs the rotation angles (rotation angle along x, rotation angle along y)
     and the coordinates (3D array) of the cloud of points
     """
-    theta, phi = angles
 
+    angles = np.array(angles)
     # cloud of points rotation
-    M = bf.rotation(theta, phi, 'xy')
-    coord_rot = np.dot(coord, M)
+    coords_rot = bf.rotate_aggregate(coords, angles=angles)
 
     # calculation of the side
-    min_x = min(coord_rot[:, 0])
-    max_x = max(coord_rot[:, 0])
-    min_y = min(coord_rot[:, 1])
-    max_y = max(coord_rot[:, 1])
-    min_z = min(coord_rot[:, 2])
-    max_z = max(coord_rot[:, 2])
-
-    volume = np.sqrt((max_x-min_x)**2)*np.sqrt((max_y-min_y)
-                                               ** 2)*np.sqrt((max_z-min_z)**2)
-    # volume = (max_x-min_x)*(max_y-min_y)*(max_z-min_z)
+    _min = coords_rot.min(axis=0)
+    _max = coords_rot.max(axis=0)
+    lengths = np.sqrt((_max-_min)**2)
+    volume = lengths[0]*lengths[1]*lengths[2]
 
     return volume
 
 
-def bbox_optim(coord, initial_guess):
+def angle_optim(coord, initial_guess=(0, 0), quiet=True):
     """
     Minimize the volume of the bounding box of a cloud of points
     using the L-BFGS-B method
@@ -49,7 +40,25 @@ def bbox_optim(coord, initial_guess):
     Needs the cloud of points coordinates (3D array) and an initial guess
     of the rotation angle (rotation angle along x, rotation angle along y)
     """
-    res = scipy.optimize.minimize(
-        bbox_volume, initial_guess, args=(coord), method='L-BFGS-B')
-    print('bouding box optimiztation: \n', res)
-    return res
+    res = minimize(
+        lambda angle, coords: bbox_volume(coords, angle),
+        initial_guess, args=(coord), method='L-BFGS-B')
+    if quiet is False:
+        print('bouding box optimization: \n', res)
+    if not res.success:
+        raise RuntimeError('optimization failed: ' + str(res))
+    return res.x, res.fun
+
+
+def compute_bbox(coords):
+    return {'angles': np.array([0., 0.]),
+            'volume': bbox_volume(coords)}
+
+
+def bbox_optim(coords, **kwargs):
+    angles, volume = angle_optim(coords, **kwargs)
+    volume2 = bbox_volume(coords, angles)
+    if volume != volume2:
+        raise RuntimeError('internal error')
+    return {'angles': angles,
+            'volume': volume}

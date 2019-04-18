@@ -11,7 +11,7 @@ import numpy as np
 from numpy.random import random_sample as rand
 
 
-def create_ellipsoid(npoints, a, b, c):
+def create_ellipsoid(ellipsoid, npoints=1000):
     """
     Create ellipsoid with a, b and c as half-axes and
     npoints the number of points (has to be an integer)
@@ -22,6 +22,10 @@ def create_ellipsoid(npoints, a, b, c):
     # create a vector of npoints angles theta ]0;2pi]
     theta = rand(npoints)*2.*np.pi
     phi = rand(npoints)*np.pi  # create a vector of npoints angles phi ]0;pi]
+
+    a = ellipsoid['a']
+    b = ellipsoid['b']
+    c = ellipsoid['c']
     points[:, 0] = a*np.cos(theta)*np.sin(phi)  # x
     points[:, 1] = b*np.sin(theta)*np.sin(phi)  # y
     points[:, 2] = c*np.cos(phi)  # z
@@ -48,13 +52,15 @@ def compute_center(points):
     return center
 
 
-def rotation(theta, phi, order):
+def rotation(angles, order='xy'):
     """"
     Compute rotation array with theta angle rotating along the x axis
     and phi rotating along the y axis
     Order is 'xy' = rotation along x first and then along y,
     or 'yx' = rotation along y first and then along x
     """
+
+    theta, phi = angles
     Rx = [[1, 0, 0], [0, np.cos(theta), -np.sin(theta)],
           [0, np.sin(theta), np.cos(theta)]]
     Ry = [[np.cos(phi), 0, -np.sin(phi)], [0, 1, 0],
@@ -64,3 +70,14 @@ def rotation(theta, phi, order):
     elif order == 'yx':
         M = np.dot(Ry, Rx)
     return M
+
+
+def rotate_aggregate(coords, mat=None, angles=None, **kwargs):
+    "Apply a rotation onto an aggregate"
+
+    if mat is None:
+        if angles is None:
+            raise RuntimeError('Need angles or matrix to rotate')
+        mat = rotation(angles, **kwargs)
+    coords_rot = np.dot(coords, mat)
+    return coords_rot

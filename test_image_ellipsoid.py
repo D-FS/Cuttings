@@ -9,8 +9,8 @@ import numpy as np
 import basic_functions as bf
 
 
-def ellipsoid_test_image(npoints, a, b, c, noise_amplitude,
-                         rotation_angle_x, rotation_angle_y):
+def ellipsoid_test_image(ellipsoid, npoints=1000,
+                         noise_amplitude=10., angles=(0., 0.)):
     """
     Create an ellipsoidal test image with npoints and a, b, c as half-axes
     A noise is created with an amplitude = noise_amplitude
@@ -20,7 +20,7 @@ def ellipsoid_test_image(npoints, a, b, c, noise_amplitude,
     ellispoid with noise
     """
 
-    points = bf.create_ellipsoid(npoints, a, b, c)
+    points = bf.create_ellipsoid(ellipsoid, npoints=npoints)
     bf.add_noise(points, noise_amplitude)
     center = bf.compute_center(points)
 
@@ -28,8 +28,7 @@ def ellipsoid_test_image(npoints, a, b, c, noise_amplitude,
     points = points - center
 
     # aggregate coordinates xyz after rotation
-    test_image_coord = np.dot(points, bf.rotation(
-        rotation_angle_x, rotation_angle_y, 'yx'))
+    test_image_coord = np.dot(points, bf.rotation(angles, order='yx'))
 
     # recenter test_image_coord = put center to 0
     center = bf.compute_center(test_image_coord)
