@@ -44,7 +44,7 @@ def angle_optim(coord, initial_guess=(0, 0), quiet=True):
         lambda angle, coords: bbox_volume(coords, angle),
         initial_guess, args=(coord), method='L-BFGS-B')
     if quiet is False:
-        print('bouding box optimization: \n', res)
+        print('bounding box optimization: \n', res)
     if not res.success:
         raise RuntimeError('optimization failed: ' + str(res))
     return res.x, res.fun
