@@ -127,6 +127,8 @@ def plot_ellipsoid(ellipsoid, ax=None):
     # Plot:
     ax.plot_wireframe(x, y, z,  rstride=4, cstride=4,
                       color='r', linewidths=.6)
+    
+    return
 
 
 def fit_ellipsoid_plot(coord_agg, ellipsoid):
