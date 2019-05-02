@@ -25,7 +25,6 @@ def included_ellipsoid_optim(coord, tol=1e-3, quiet=True):
         
     # rotation of the cloud of points in the main direction of the bbox
     coord = bf.rotate_aggregate(coord, angles=bbox_res['angles'])
-    # plot.bbox_plot(coord, 0., 0., 2)
 
     # initial a, b, c
     a = (np.sqrt((max(coord[:, 0])-min(coord[:, 0]))**2))/2.
@@ -84,12 +83,7 @@ def included_ellipsoid_optim(coord, tol=1e-3, quiet=True):
             break
 
         volume = 4./3.*np.pi*a*b*c
-        """
-        print('volume =', volume)
-        print('point inside :', point_inside)
-        print('New dimensions: a = ', a, 'b = ', b, 'c = ', c)
-        print('---')
-        """        
+        
         if (quiet is False):
             print('volume =', volume)
             print('a = ', a, 'b = ', b, 'c = ', c)

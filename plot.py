@@ -23,9 +23,10 @@ def scatter_plot(coord_agg, ax=None):
 
     ax.set_xlabel('x')
     ax.set_ylabel('y')
-    ax.set_zlabel('y')
+    ax.set_zlabel('z')
     ax.scatter(coord_agg[:, 0], coord_agg[:, 1],
-               coord_agg[:, 2], marker='o', s=0.1)
+               coord_agg[:, 2], marker='o', s=0.000001)
+    #ax.view_init(elev=100., azim=90.)
     return ax
 
 
@@ -62,7 +63,7 @@ def bbox_plot(coord_agg, bbox, npoints_bbox=20, ax=None):
     plt.xlabel('x')
     plt.ylabel('y')
     ax.scatter(coord_agg[:, 0], coord_agg[:, 1],
-               coord_agg[:, 2], marker='o', s=0.1)
+               coord_agg[:, 2], marker='o', s=0.00001)
 
     # draw bounding box
     ROT = bf.rotation(bbox['angles'])
@@ -105,7 +106,7 @@ def bbox_plot(coord_agg, bbox, npoints_bbox=20, ax=None):
 
 
 def plot_ellipsoid(ellipsoid, ax=None):
-    "simply dray an ellipsoid"
+    "simply drawf an ellipsoid"
 
     if ax is None:
         fig = plt.figure()
@@ -130,6 +131,29 @@ def plot_ellipsoid(ellipsoid, ax=None):
     
     return
 
+def set_axes_radius(ax, origin, radius):
+    ax.set_xlim3d([origin[0] - radius, origin[0] + radius])
+    ax.set_ylim3d([origin[1] - radius, origin[1] + radius])
+    ax.set_zlim3d([origin[2] - radius, origin[2] + radius])
+
+def set_axes_equal(ax):
+    '''Make axes of 3D plot have equal scale so that spheres appear as spheres,
+    cubes as cubes, etc..  This is one possible solution to Matplotlib's
+    ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
+
+    Input
+      ax: a matplotlib axis, e.g., as output from plt.gca().
+    '''
+
+    limits = np.array([
+        ax.get_xlim3d(),
+        ax.get_ylim3d(),
+        ax.get_zlim3d(),
+    ])
+
+    origin = np.mean(limits, axis=1)
+    radius = 0.5 * np.max(np.abs(limits[:, 1] - limits[:, 0]))
+    set_axes_radius(ax, origin, radius)
 
 def fit_ellipsoid_plot(coord_agg, ellipsoid):
     """
@@ -145,9 +169,10 @@ def fit_ellipsoid_plot(coord_agg, ellipsoid):
     plt.xlabel('x')
     plt.ylabel('y')
     ax.scatter(coord_agg[:, 0], coord_agg[:, 1],
-               coord_agg[:, 2], marker='o', s=0.1)
+               coord_agg[:, 2], marker='o', s=0.01)
 
     # draw ellipsoid
     plot_ellipsoid(ellipsoid, ax=ax)
-
+    #ax.view_init(elev=-1, azim=90)
+    
     return ax

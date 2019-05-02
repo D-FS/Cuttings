@@ -25,15 +25,18 @@ def bounding_ellipsoid_optim(coord, tol=1e-3, quiet=True):
 
     # rotation of the cloud of points in the main direction of the bbox
     coord = bf.rotate_aggregate(coord, angles=bbox_res['angles'])
-    # plot.bbox_plot(coord, 0., 0., 2)
 
     # initial a, b, c
     a = np.sqrt((max(coord[:, 0])-min(coord[:, 0]))**2)/2.
     b = np.sqrt((max(coord[:, 1])-min(coord[:, 1]))**2)/2.
     c = np.sqrt((max(coord[:, 2])-min(coord[:, 2]))**2)/2.
+    a_before = 2.*a
+    b_before = 2.*b
+    c_before = 2.*c
 
     volume_before = 0.
     volume = 4./3.*np.pi*a*b*c
+    test = 'false'
 
     while abs(volume - volume_before) > tol:
         volume_before = volume
@@ -49,13 +52,17 @@ def bounding_ellipsoid_optim(coord, tol=1e-3, quiet=True):
                 point_outside = 'false'
 
         if point_outside == 'true':
+            a1 = a_before
+            b1 = b_before
+            c1 = c_before
             a_before = a
             b_before = b
             c_before = c
-            a = a*2
-            b = b*2
-            c = c*2
-        elif point_outside == 'false':
+            a = a + abs(a1-a)/2.
+            b = b + abs(b1-b)/2.
+            c = c + abs(c1-c)/2.
+            test = 'true'
+        elif point_outside == 'false' and test == 'true':
             a1 = a_before
             b1 = b_before
             c1 = c_before
@@ -65,12 +72,13 @@ def bounding_ellipsoid_optim(coord, tol=1e-3, quiet=True):
             a = a - abs(a1-a)/2.
             b = b - abs(b1-b)/2.
             c = c - abs(c1-c)/2.
+        else:
+            print(
+                'error, the bbox did not work:'
+                ' bbox does not not touch the extrema of the cloud of points')
+            break
 
         volume = 4./3.*np.pi*a*b*c
-        """
-        print(point_outside)
-        print('before =', volume_before)
-        """
 
     if (quiet is False):
         print('volume =', volume)

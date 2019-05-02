@@ -32,7 +32,7 @@ def bbox_volume(coords, angles=(0., 0.)):
     return volume
 
 
-def angle_optim(coord, initial_guess=(0, 0), quiet=True):
+def angle_optim(coord, initial_guess=(0, 0), method='Nelder-Mead', quiet=True):
     """
     Minimize the volume of the bounding box of a cloud of points
     using the L-BFGS-B method
@@ -40,9 +40,15 @@ def angle_optim(coord, initial_guess=(0, 0), quiet=True):
     Needs the cloud of points coordinates (3D array) and an initial guess
     of the rotation angle (rotation angle along x, rotation angle along y)
     """
+    
+    if method == 'Nelder-Mead':
+        options = {'maxfev': 1000}
+    else:
+        options = None
+    
     res = minimize(
         lambda angle, coords: bbox_volume(coords, angle),
-        initial_guess, args=(coord), method='L-BFGS-B')
+        initial_guess, args=(coord), method, options)
     if quiet is False:
         print('bounding box optimization: \n', res)
     if not res.success:
