@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import basic_functions as bf
+from scipy.interpolate import griddata
+import indicators_calculation as calc
 
 
 def scatter_plot(coord_agg, ax=None):
@@ -174,5 +176,42 @@ def fit_ellipsoid_plot(coord_agg, ellipsoid):
     # draw ellipsoid
     plot_ellipsoid(ellipsoid, ax=ax)
     #ax.view_init(elev=-1, azim=90)
+    
+    return ax
+
+def roughness_map_plot(aggregate, ellipsoid):
+    
+    distance = calc.roughness_distance(aggregate, ellipsoid)
+    
+    ax = plt.figure()
+    #ax = fig.add_subplot(111, projection='3d')
+
+    X, Y, Z, = np.array([]), np.array([]), np.array([])
+    for i in range(len(distance)):
+            X = np.append(X, distance[i, 0])
+            Y = np.append(Y, distance[i, 1])
+            Z = np.append(Z, distance[i, 2])
+    
+    # create x-y points to be used in heatmap
+    xi = np.linspace(X.min(), X.max(), 1000)
+    yi = np.linspace(Y.min(), Y.max(), 1000)
+    
+    # Z is a matrix of x-y values
+    zi = griddata((X, Y), Z, (xi[None,:], yi[:,None]), method='cubic')
+    
+
+    # I control the range of my colorbar by removing data 
+    # outside of my range of interest
+    zmin = -12
+    zmax = 12
+    zi[(zi<zmin) | (zi>zmax)] = None
+    
+    # Create the contour plot
+    ax = plt.contourf(xi, yi, zi, 15, cmap=plt.cm.seismic,
+                      vmax=zmax, vmin=zmin)
+        
+    #ax = plt.contourf(xi, yi, zi, 15, cmap=plt.cm.rainbow)
+    plt.colorbar()  
+    plt.show()
     
     return ax

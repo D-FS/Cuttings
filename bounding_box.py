@@ -48,7 +48,7 @@ def angle_optim(coord, initial_guess=(0, 0), method='Nelder-Mead', quiet=True):
     
     res = minimize(
         lambda angle, coords: bbox_volume(coords, angle),
-        initial_guess, args=(coord), method, options)
+        initial_guess, args=(coord), method = method, options = options)
     if quiet is False:
         print('bounding box optimization: \n', res)
     if not res.success:

@@ -7,6 +7,8 @@ Created on Fri Apr  5 11:34:31 2019
 """
 
 import numpy as np
+from scipy.special import ellipkinc, ellipeinc
+
 # random_sample returns floats in the interval ]0.0;1.0]
 from numpy.random import random_sample as rand
 
@@ -17,11 +19,12 @@ def create_ellipsoid(ellipsoid, npoints=1000):
     npoints the number of points (has to be an integer)
     return an array with shape (npoints, 3)
     """
-    points = np.zeros(
-        (npoints, 3))  # create an array of zeros from size npoints x 3
+    # create an array of zeros from size npoints x 3
+    points = np.zeros((npoints, 3)) 
     # create a vector of npoints angles theta ]0;2pi]
-    theta = rand(npoints)*2.*np.pi
-    phi = rand(npoints)*np.pi  # create a vector of npoints angles phi ]0;pi]
+    theta = rand(npoints)*2.*np.pi 
+    # create a vector of npoints angles phi ]0;pi]
+    phi = rand(npoints)*np.pi  
 
     a = ellipsoid['a']
     b = ellipsoid['b']
@@ -31,6 +34,30 @@ def create_ellipsoid(ellipsoid, npoints=1000):
     points[:, 2] = c*np.cos(phi)  # z
     return points
 
+def ellipsoid_area(ellipsoid):
+    """
+    Compute the surface of a define ellipsoid with its half-axes (a, b, c)
+    """
+    c, b, a = sorted([ellipsoid['a'], ellipsoid['b'], ellipsoid['c']])
+    phi = np.arccos(c/a)
+    m = (a**2 * (b**2 - c**2)) / (b**2 * (a**2 - c**2))
+    temp = ellipeinc(phi, m)*np.sin(phi)**2 + ellipkinc(phi, m)*np.cos(phi)**2
+    area = 2*np.pi*(c**2 + a*b*temp/np.sin(phi))
+    return area
+
+def mid_ellipsoid (bounding_ellipsoid, included_ellipsoid):
+    """
+    Compute the middle ellipsoid
+    It is the average ellipsoid between the bounding one and the included one
+    """
+    a = (bounding_ellipsoid['a'] + included_ellipsoid['a'])/2.
+    b = (bounding_ellipsoid['b'] + included_ellipsoid['b'])/2.
+    c = (bounding_ellipsoid['c'] + included_ellipsoid['c'])/2.
+    volume = 4./3.*np.pi*a*b*c
+    return {'volume': volume,
+            'a': a,
+            'b': b,
+            'c': c}
 
 def add_noise(points, amplitude):
     """
@@ -51,6 +78,25 @@ def compute_center(points):
     center = np.average(points, axis=0)
     return center
 
+def unit_vector(vector):
+    """ 
+    Returns the unit vector of the vector.  
+    """
+    return vector / np.linalg.norm(vector)
+
+def angle_between(v1, v2):
+    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+            >>> angle_between((1, 0, 0), (0, 1, 0))
+            1.5707963267948966
+            >>> angle_between((1, 0, 0), (1, 0, 0))
+            0.0
+            >>> angle_between((1, 0, 0), (-1, 0, 0))
+            3.141592653589793
+    """
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
 def rotation(angles, order='xy'):
     """"
