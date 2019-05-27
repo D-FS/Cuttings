@@ -7,9 +7,8 @@ Created on Fri Apr  5 11:34:31 2019
 """
 
 import numpy as np
+import math
 from scipy.special import ellipkinc, ellipeinc
-
-# random_sample returns floats in the interval ]0.0;1.0]
 from numpy.random import random_sample as rand
 
 
@@ -22,9 +21,9 @@ def create_ellipsoid(ellipsoid, npoints=1000):
     # create an array of zeros from size npoints x 3
     points = np.zeros((npoints, 3)) 
     # create a vector of npoints angles theta ]0;2pi]
-    theta = rand(npoints)*2.*np.pi 
+    theta = rand(npoints)*2.*np.pi
     # create a vector of npoints angles phi ]0;pi]
-    phi = rand(npoints)*np.pi  
+    phi = rand(npoints)*np.pi
 
     a = ellipsoid['a']
     b = ellipsoid['b']
@@ -97,6 +96,33 @@ def angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+def angle_between_2D(v1, v2):
+    """ Returns the angle [0, 2pi[ in radians between 2D vectors 'v1' and 'v2'::
+
+            >>> angle_between((1, 0), (0, 1))
+            1.5707963267948966
+           
+    """
+    dot = v1[0]*v2[0] + v1[1]*v2[1]      # dot product between [x1, y1] and [x2, y2]
+    det = v1[0]*v2[1] - v1[1]*v2[0]      # determinant
+    angle = np.arctan2(det, dot)        # atan2(y, x) or atan2(sin, cos)
+    if angle < 0. :
+        angle += 2.*np.pi 
+    return angle
+
+def angle_between_3D_inplane(v1, v2, vn):
+    """ Returns the angle in radians between 3D vectors 'v1' and 'v2' 
+    in a known plane with normal unit (to be normalized if not!) vector vn::
+
+            >>> angle_between((1, 0), (0, 1))
+            1.5707963267948966
+           
+    """
+    dot = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]     # dot product 
+    det = v1[0]*v2[1]*vn[2] + v2[0]*vn[1]*v1[2] + vn[0]*v1[1]*v2[2] - v1[2]*v2[1]*vn[0] - v2[2]*vn[1]*v1[0] - vn[2]*v1[1]*v2[0]      # determinant
+    angle = math.atan2(det, dot)        # atan2(y, x) or atan2(sin, cos)
+    return angle
 
 def rotation(angles, order='xy'):
     """"

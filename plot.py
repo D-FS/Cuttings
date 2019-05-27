@@ -11,10 +11,10 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import basic_functions as bf
 from scipy.interpolate import griddata
-import indicators_calculation as calc
 
 
-def scatter_plot(coord_agg, ax=None):
+
+def scatter_plot(coord_agg, point_size = 0.1, ax=None):
     """
     Plots the cloud of points of the aggregate
     """
@@ -27,7 +27,7 @@ def scatter_plot(coord_agg, ax=None):
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     ax.scatter(coord_agg[:, 0], coord_agg[:, 1],
-               coord_agg[:, 2], marker='o', s=0.000001)
+               coord_agg[:, 2], marker='o', s=point_size)
     #ax.view_init(elev=100., azim=90.)
     return ax
 
@@ -46,12 +46,14 @@ def radii_histogram(coord):
     # plot the histogram graph
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_xlabel('radii')
+    ax.set_ylabel('# of points')
     ax.plot(bins, hist)
 
     return
 
 
-def bbox_plot(coord_agg, bbox, npoints_bbox=20, ax=None):
+def bbox_plot(coord_agg, bbox, npoints_bbox=20, point_size = 0.00001, ax=None):
     """
     Plots the cloud of points of the aggregate and its bounding box
     Needs the coordinates of the aggregate (3D array),
@@ -65,7 +67,7 @@ def bbox_plot(coord_agg, bbox, npoints_bbox=20, ax=None):
     plt.xlabel('x')
     plt.ylabel('y')
     ax.scatter(coord_agg[:, 0], coord_agg[:, 1],
-               coord_agg[:, 2], marker='o', s=0.00001)
+               coord_agg[:, 2], marker='o', s=point_size)
 
     # draw bounding box
     ROT = bf.rotation(bbox['angles'])
@@ -108,7 +110,7 @@ def bbox_plot(coord_agg, bbox, npoints_bbox=20, ax=None):
 
 
 def plot_ellipsoid(ellipsoid, ax=None):
-    "simply drawf an ellipsoid"
+    "simply draw an ellipsoid"
 
     if ax is None:
         fig = plt.figure()
@@ -157,7 +159,7 @@ def set_axes_equal(ax):
     radius = 0.5 * np.max(np.abs(limits[:, 1] - limits[:, 0]))
     set_axes_radius(ax, origin, radius)
 
-def fit_ellipsoid_plot(coord_agg, ellipsoid):
+def fit_ellipsoid_plot(coord_agg, ellipsoid, point_size=0.1):
     """
     Plots the cloud of points of the aggregate and its bounded or
     bounding ellipsoid
@@ -171,7 +173,7 @@ def fit_ellipsoid_plot(coord_agg, ellipsoid):
     plt.xlabel('x')
     plt.ylabel('y')
     ax.scatter(coord_agg[:, 0], coord_agg[:, 1],
-               coord_agg[:, 2], marker='o', s=0.01)
+               coord_agg[:, 2], marker='o', s=point_size)
 
     # draw ellipsoid
     plot_ellipsoid(ellipsoid, ax=ax)
@@ -179,18 +181,31 @@ def fit_ellipsoid_plot(coord_agg, ellipsoid):
     
     return ax
 
-def roughness_map_plot(aggregate, ellipsoid):
-    
-    distance = calc.roughness_distance(aggregate, ellipsoid)
-    
-    ax = plt.figure()
-    #ax = fig.add_subplot(111, projection='3d')
-
-    X, Y, Z, = np.array([]), np.array([]), np.array([])
+def roughness_map_plot(distance, scale_maxvalue=0.01):
+    """
+    Plot the roughness map for an aggregate
+    Neeeds the roughness distance composed at least by:
+        -Angles theta is on the x axis
+        -Angles phi is on the y axis
+        -Roughness distances is on the z axis (colormap)
+    The scale_maxvalue allows to set the extremum of the z axis
+    """
+    axe = plt.figure()
+    X, Y, Z, alpha, beta = np.array([]), np.array([]), np.array([]), np.array([]), np.array([])
     for i in range(len(distance)):
             X = np.append(X, distance[i, 0])
             Y = np.append(Y, distance[i, 1])
             Z = np.append(Z, distance[i, 2])
+            alpha = np.append(alpha, distance[i, 3])
+            beta = np.append(beta, distance[i, 4])
+            
+    print(' ')
+    print('data', 'min', 'max')        
+    print('theta', min(X), max(X))
+    print('phi', min(Y), max(Y))
+    print('alpha', min(alpha), max(alpha))
+    print('beta', min(beta), max(beta))
+    print('distance', min(Z), max(Z))
     
     # create x-y points to be used in heatmap
     xi = np.linspace(X.min(), X.max(), 1000)
@@ -199,19 +214,33 @@ def roughness_map_plot(aggregate, ellipsoid):
     # Z is a matrix of x-y values
     zi = griddata((X, Y), Z, (xi[None,:], yi[:,None]), method='cubic')
     
-
     # I control the range of my colorbar by removing data 
     # outside of my range of interest
-    zmin = -12
-    zmax = 12
+    zmin = -scale_maxvalue
+    zmax = scale_maxvalue
     zi[(zi<zmin) | (zi>zmax)] = None
     
-    # Create the contour plot
-    ax = plt.contourf(xi, yi, zi, 15, cmap=plt.cm.seismic,
-                      vmax=zmax, vmin=zmin)
-        
-    #ax = plt.contourf(xi, yi, zi, 15, cmap=plt.cm.rainbow)
+    # Create the contour plot (seismic, rainbow)
+    axe = plt.contourf(xi, yi, zi, 15, cmap=plt.cm.seismic, vmax=zmax, vmin=zmin)  
     plt.colorbar()  
     plt.show()
-    
-    return ax
+    return axe
+
+def roughness_distance_histogram(distance):
+    """
+    Plot the histogram of roughness distance from the aggregate
+    Needs the roughness distance
+    Return the roughness distance histogram plot
+    """
+    # compute histogram of radii
+    #dist = np.sqrt(np.einsum('ai,ai->a', coord, coord))
+    hist, bins = np.histogram(distance[:, 2], bins=100)
+    bins = (bins[1:] + bins[:-1])/2.
+
+    # plot the histogram graph
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_xlabel('distance')
+    ax.set_ylabel('# of points')
+    ax.plot(bins, hist)
+    return
