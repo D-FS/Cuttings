@@ -38,10 +38,13 @@ def ellipsoid_area(ellipsoid):
     Compute the surface of a define ellipsoid with its half-axes (a, b, c)
     """
     c, b, a = sorted([ellipsoid['a'], ellipsoid['b'], ellipsoid['c']])
-    phi = np.arccos(c/a)
-    m = (a**2 * (b**2 - c**2)) / (b**2 * (a**2 - c**2))
-    temp = ellipeinc(phi, m)*np.sin(phi)**2 + ellipkinc(phi, m)*np.cos(phi)**2
-    area = 2*np.pi*(c**2 + a*b*temp/np.sin(phi))
+    if a == b == c:
+        area = 4*np.pi*a**2
+    else:
+        phi = np.arccos(c/a)
+        m = (a**2 * (b**2 - c**2)) / (b**2 * (a**2 - c**2))
+        temp = ellipeinc(phi, m)*np.sin(phi)**2 + ellipkinc(phi, m)*np.cos(phi)**2
+        area = 2*np.pi*(c**2 + a*b*temp/np.sin(phi))
     return area
 
 def mid_ellipsoid (bounding_ellipsoid, included_ellipsoid):

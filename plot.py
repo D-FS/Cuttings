@@ -10,7 +10,10 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import basic_functions as bf
+import scipy
 from scipy.interpolate import griddata
+from scipy.ndimage import gaussian_filter
+import indicators_calculation as ic
 
 
 
@@ -181,7 +184,7 @@ def fit_ellipsoid_plot(coord_agg, ellipsoid, point_size=0.1):
     
     return ax
 
-def roughness_map_plot(distance, scale_maxvalue=0.01):
+def roughness_map_plot(distance, scale_maxvalue=0.01, sigma=1):
     """
     Plot the roughness map for an aggregate
     Neeeds the roughness distance composed at least by:
@@ -190,14 +193,17 @@ def roughness_map_plot(distance, scale_maxvalue=0.01):
         -Roughness distances is on the z axis (colormap)
     The scale_maxvalue allows to set the extremum of the z axis
     """
-    axe = plt.figure()
+    axe1 = plt.figure()
+    axe2 = plt.figure()
+    axe3 = plt.figure()
+   
     X, Y, Z, alpha, beta = np.array([]), np.array([]), np.array([]), np.array([]), np.array([])
-    for i in range(len(distance)):
-            X = np.append(X, distance[i, 0])
-            Y = np.append(Y, distance[i, 1])
-            Z = np.append(Z, distance[i, 2])
-            alpha = np.append(alpha, distance[i, 3])
-            beta = np.append(beta, distance[i, 4])
+    
+    X = distance[:, 0]
+    Y = distance[:, 1]
+    Z = distance[:, 2]
+    alpha = distance[:, 3]
+    beta = distance[:, 4]
             
     print(' ')
     print('data', 'min', 'max')        
@@ -208,23 +214,47 @@ def roughness_map_plot(distance, scale_maxvalue=0.01):
     print('distance', min(Z), max(Z))
     
     # create x-y points to be used in heatmap
-    xi = np.linspace(X.min(), X.max(), 1000)
+    xi = np.linspace(X.min(), X.max(), 2000)
     yi = np.linspace(Y.min(), Y.max(), 1000)
     
     # Z is a matrix of x-y values
     zi = griddata((X, Y), Z, (xi[None,:], yi[:,None]), method='cubic')
-    
+    zi_filtered = scipy.ndimage.gaussian_filter(zi, sigma)
+    rugosity = zi-zi_filtered
+   
     # I control the range of my colorbar by removing data 
     # outside of my range of interest
     zmin = -scale_maxvalue
     zmax = scale_maxvalue
     zi[(zi<zmin) | (zi>zmax)] = None
+    zi_filtered[(zi_filtered<zmin) | (zi_filtered>zmax)] = None
     
     # Create the contour plot (seismic, rainbow)
-    axe = plt.contourf(xi, yi, zi, 15, cmap=plt.cm.seismic, vmax=zmax, vmin=zmin)  
+    #axe = plt.contourf(xi, yi, zi, 15, cmap=plt.cm.seismic, vmax=zmax, vmin=zmin)  
+    axe1 = plt.imshow(zi, cmap=plt.cm.seismic, origin= {'lower'})
     plt.colorbar()  
     plt.show()
-    return axe
+    
+    axe2 = plt.imshow(zi_filtered, cmap=plt.cm.seismic, origin= {'lower'})
+    plt.colorbar()  
+    plt.show()
+    
+    rugosity_min = -scale_maxvalue/10.
+    rugosity_max = scale_maxvalue/10.
+    rugosity[(rugosity<rugosity_min) | (rugosity>rugosity_max)] = None
+    axe3 = plt.imshow(rugosity, cmap=plt.cm.seismic, origin= {'lower'})
+    plt.colorbar()  
+    plt.show()
+    """
+    #zi_filtered_fft = np.fft.ifft2(np.fft.fft2(zi))
+    #zi_filtered_fft[(zi_filtered_fft<rugosity_min) | (zi_filtered_fft>rugosity_max)] = None
+    fig4 = plt.figure()
+    axe4 = fig4.add_subplot(111, projection='3d')
+    axe4.scatter(X, Y, Z, marker='o', s=0.1)
+    plt.colorbar()  
+    plt.show()
+    """
+    return axe1, axe2, axe3
 
 def roughness_distance_histogram(distance):
     """

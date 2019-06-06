@@ -10,7 +10,7 @@ import basic_functions as bf
 import plot
 import math
 
-def indicators(aggregate, bounding_ellipsoid, middle_ellipsoid, included_ellipsoid, tomo_surface, tomo_volume, scale_maxvalue=0.01):
+def indicators(aggregate, bounding_ellipsoid, middle_ellipsoid, included_ellipsoid, tomo_surface, tomo_volume, scale_maxvalue=0.01, sigma=1):
     """
     Compute all indicators
     """
@@ -36,7 +36,7 @@ def indicators(aggregate, bounding_ellipsoid, middle_ellipsoid, included_ellipso
     print('Roughness map (middle ellipsoid): ')
     distance = roughness_distance(aggregate, middle_ellipsoid)
     print('Mean absolute roughness distance =', roughness_mean(distance))
-    plot.roughness_map_plot(distance, scale_maxvalue)
+    plot.roughness_map_plot(distance, scale_maxvalue, sigma)
     plot.roughness_distance_histogram(distance)
     
     return {'aggregate_standard_sphericity': std_sphericity(tomo_surface, tomo_volume),
