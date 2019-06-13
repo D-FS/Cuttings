@@ -10,7 +10,8 @@ import basic_functions as bf
 import plot
 import math
 
-def indicators(aggregate, bounding_ellipsoid, middle_ellipsoid, included_ellipsoid, tomo_surface, tomo_volume, scale_maxvalue=0.01, sigma=1):
+def indicators(aggregate, bounding_ellipsoid, middle_ellipsoid, included_ellipsoid, 
+               tomo_surface, tomo_volume, scale_maxvalue=0.004, sigma=5):
     """
     Compute all indicators
     """
@@ -35,9 +36,17 @@ def indicators(aggregate, bounding_ellipsoid, middle_ellipsoid, included_ellipso
           tomo_ellipsoid_surface_ratio(tomo_surface, included_ellipsoid))
     print('Roughness map (middle ellipsoid): ')
     distance = roughness_distance(aggregate, middle_ellipsoid)
-    print('Mean absolute roughness distance =', roughness_mean(distance))
-    plot.roughness_map_plot(distance, scale_maxvalue, sigma)
-    plot.roughness_distance_histogram(distance)
+    print('Mean absolute roughness distance =', roughness_stats(distance)['roughness_mean'])
+    print('Roughness distance min and max', roughness_stats(distance)['distance_min_max'])
+    map1 = plot.roughness_map_plot(distance, scale_maxvalue, sigma)
+    print('Mean absolute gaussian filtered roughness distance =', 
+          gaussian_roughness_stats(map1['gaussian_filtered_roughness'])['gaussian_roughness_mean'])
+    print('Gaussian filtered roughness distance min and max', 
+          gaussian_roughness_stats(map1['gaussian_filtered_roughness'])['gaussian_distance__min_max'])
+    print('Roughness histogram (unfiltered)')
+    plot.roughness_distance_histogram(distance[:, 2])
+    #print('Roughness histogram (filtered)')
+    #plot.roughness_distance_histogram(map1['gaussian_filtered_roughness'], bins=10)
     
     return {'aggregate_standard_sphericity': std_sphericity(tomo_surface, tomo_volume),
             'a/b': ab_ratio(a, b),
@@ -52,7 +61,8 @@ def indicators(aggregate, bounding_ellipsoid, middle_ellipsoid, included_ellipso
                 tomo_ellipsoid_surface_ratio(tomo_surface, middle_ellipsoid),
             'aggregate_tomographed_surface/included_ellipsoid_surface': 
                 tomo_ellipsoid_surface_ratio(tomo_surface, included_ellipsoid),
-            'roughness_distance': roughness_distance(aggregate, middle_ellipsoid)
+            'roughness_distance': roughness_distance(aggregate, middle_ellipsoid),
+            'gaussian_filtered_roughness': map1['gaussian_filtered_roughness']
             }
 
 def std_sphericity(tomo_surface, tomo_volume):
@@ -94,7 +104,6 @@ def roughness_distance(aggregate, ellipsoid):
     distance = np.zeros((len(aggregate), 5))
 
     for i in range(len(aggregate)):
-        
         # Angle calculations
         theta = bf.angle_between_2D([1., 0.], 
                               [aggregate[i, 0], 
@@ -108,7 +117,8 @@ def roughness_distance(aggregate, ellipsoid):
         if alpha < 0. :
             alpha += 2.*np.pi 
             
-        beta = math.atan2(c*np.sin(phi), (np.cos(phi)*(np.sqrt((a*np.cos(alpha))**2+(b*np.sin(alpha))**2))))
+        beta = math.atan2(c*np.sin(phi), 
+                          (np.cos(phi)*(np.sqrt((a*np.cos(alpha))**2+(b*np.sin(alpha))**2))))
 
         # Equivalent ellipsoid point calculation
         ellipsoid_point[i, 0] = a*np.cos(alpha)*np.sin(beta)
@@ -128,19 +138,38 @@ def roughness_distance(aggregate, ellipsoid):
         distance[i, 3] = alpha
         distance[i, 4] = beta
         
-    #plot.scatter_plot(ellipsoid_point)
     return distance
 
-def roughness_mean(distance):
+def roughness_stats(distance):
     """
-    Compute the mean of the absolute roughness distance
+    Compute the mean of the absolute roughness distance and the 
+    extrema (min and max) of the angles (theta, phi, alpha and beta
+    and the distance
+    Expect [5, n] array shape
+    """ 
+    theta_min_max = [np.min(distance[:, 0]), np.max(distance[:, 0])]
+    phi_min_max = [np.min(distance[:, 1]), np.max(distance[:, 1])]
+    distance_min_max = [np.min(distance[:, 2]), np.max(distance[:, 2])]
+    alpha_min_max = [np.min(distance[:, 3]), np.max(distance[:, 3])]
+    beta_min_max = [np.min(distance[:, 4]), np.max(distance[:, 4])]
+    roughness_mean = np.mean(np.abs(distance[:, 2]))
+    return {'roughness_mean': roughness_mean,
+            'distance_min_max': distance_min_max,
+            'theta_min_max': theta_min_max,
+            'phi_min_max': phi_min_max,
+            'alpha_min_max': alpha_min_max,
+            'beta_min_max': beta_min_max
+            }
+            
+
+def gaussian_roughness_stats(gaussian_distance):
     """
-    return np.mean(np.abs(distance[:, 2]))
-
-
-
-
-
-
-
-
+    Compute the mean and the extrema of the absolute roughness distance 
+    for a gaussian filtered image
+    Expect 1D array
+    """
+    gaussian_roughness_mean = np.nanmean(np.abs(gaussian_distance))
+    gaussian_distance__min_max = [np.nanmin(gaussian_distance), np.nanmax(gaussian_distance)]
+    return {'gaussian_roughness_mean': gaussian_roughness_mean,
+            'gaussian_distance__min_max': gaussian_distance__min_max
+            }

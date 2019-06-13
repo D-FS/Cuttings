@@ -71,7 +71,7 @@ def add_noise(points, amplitude):
     # with floats btw ]-1;0] multiplied by an amplitude
     dX = (rand((npoints, 3)) - 1.)*amplitude
     points += dX  # add noise to points
-
+    return
 
 def compute_center(points):
     """
@@ -87,7 +87,8 @@ def unit_vector(vector):
     return vector / np.linalg.norm(vector)
 
 def angle_between(v1, v2):
-    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+    """ 
+    Returns the angle in radians between vectors 'v1' and 'v2'::
 
             >>> angle_between((1, 0, 0), (0, 1, 0))
             1.5707963267948966
@@ -101,7 +102,8 @@ def angle_between(v1, v2):
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
 def angle_between_2D(v1, v2):
-    """ Returns the angle [0, 2pi[ in radians between 2D vectors 'v1' and 'v2'::
+    """ 
+    Returns the angle [0, 2pi[ in radians between 2D vectors 'v1' and 'v2'::
 
             >>> angle_between((1, 0), (0, 1))
             1.5707963267948966
@@ -115,7 +117,8 @@ def angle_between_2D(v1, v2):
     return angle
 
 def angle_between_3D_inplane(v1, v2, vn):
-    """ Returns the angle in radians between 3D vectors 'v1' and 'v2' 
+    """ 
+    Returns the angle in radians between 3D vectors 'v1' and 'v2' 
     in a known plane with normal unit (to be normalized if not!) vector vn::
 
             >>> angle_between((1, 0), (0, 1))
@@ -148,7 +151,9 @@ def rotation(angles, order='xy'):
 
 
 def rotate_aggregate(coords, mat=None, angles=None, **kwargs):
-    "Apply a rotation onto an aggregate"
+    """
+    Apply a rotation onto an aggregate
+    """
 
     if mat is None:
         if angles is None:
