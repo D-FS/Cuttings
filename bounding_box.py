@@ -13,7 +13,7 @@ import basic_functions as bf
 
 def bbox_volume(coords, angles=(0., 0.)):
     """
-    Compute the volume of bouding box of a cloud of points
+    Compute the volume of bounding box of a cloud of points
     for a given rotation of the cloud of points
     Needs the rotation angles (rotation angle along x, rotation angle along y)
     and the coordinates (3D array) of the cloud of points
@@ -54,11 +54,6 @@ def angle_optim(coord, initial_guess=(0, 0), method='Nelder-Mead', quiet=True):
     if not res.success:
         raise RuntimeError('optimization failed: ' + str(res))
     return res.x, res.fun
-
-
-def compute_bbox(coords):
-    return {'angles': np.array([0., 0.]),
-            'volume': bbox_volume(coords)}
 
 
 def bbox_optim(coords, **kwargs):

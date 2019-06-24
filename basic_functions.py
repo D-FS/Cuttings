@@ -47,7 +47,7 @@ def ellipsoid_area(ellipsoid):
         area = 2*np.pi*(c**2 + a*b*temp/np.sin(phi))
     return area
 
-def mid_ellipsoid (bounding_ellipsoid, included_ellipsoid):
+def mid_ellipsoid(bounding_ellipsoid, included_ellipsoid):
     """
     Compute the middle ellipsoid
     It is the average ellipsoid between the bounding one and the included one

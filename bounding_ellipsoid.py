@@ -12,9 +12,9 @@ import bounding_box as bbox
 import plot
 
 
-def bounding_ellipsoid_optim(coord, tol=1e-3, quiet=True):
+def bounding_ellipsoid_optim(coord, tol=1e-13, quiet=True):
     """
-    Compute the smallest bounding ellidpsoid of a cloud of points
+    Compute the smallest bounding ellipsoid of a cloud of points
     Needs the required precision (tol)
     and the coordinates (3D array) of the cloud of points
     """

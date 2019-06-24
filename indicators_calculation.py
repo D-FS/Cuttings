@@ -94,7 +94,7 @@ def tomo_ellipsoid_surface_ratio(tomo_surface, ellipsoid):
 def roughness_distance(aggregate, ellipsoid):
     """
     Compute the distance between an ellipsoid (generally, the middle one) and
-    the edges of the aggregate.    
+    the edges of the aggregate    
     """
     center = bf.compute_center(aggregate)
     a = ellipsoid['a']

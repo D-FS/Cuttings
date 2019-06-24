@@ -181,7 +181,7 @@ def map_plot(zi, scale_maxvalue=0.01):
 def roughness_map_plot(distance, scale_maxvalue=0.004, sigma=5):
     """
     Plot the roughness map for an aggregate
-    Neeeds the roughness distance composed at least by:
+    Needs the roughness distance composed at least by:
         -Angles theta is on the x axis
         -Angles phi is on the y axis
         -Roughness distances is on the z axis (colormap)

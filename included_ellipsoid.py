@@ -12,7 +12,7 @@ import bounding_box as bbox
 import plot
 
 
-def included_ellipsoid_optim(coord, tol=1e-3, quiet=True):
+def included_ellipsoid_optim(coord, tol=1e-13, quiet=True):
     """
     Compute the largest included ellidpsoid of a cloud of points
     Needs the required precision (tol)
